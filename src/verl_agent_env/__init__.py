@@ -9,6 +9,6 @@ ALL_VERL_ENVS = []
 
 gym.register(
     id="verl_env/countdown-v0",
-    entry_point="verl_agent_env.env:CountdownEnv",
+    entry_point="verl_agent_env.envs.countdown:CountdownEnv",
 )
 ALL_VERL_ENVS.append("verl_env/countdown-v0")

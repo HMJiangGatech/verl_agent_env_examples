@@ -1,5 +1,5 @@
 import gymnasium as gym
-from verl_agent_env.env import LLMAgentEnv as Env
+from verl_agent_env.envs.base import LLMAgentEnv as Env
 from verl_agent_env import ALL_VERL_ENVS
 import uuid
 from typing import Optional

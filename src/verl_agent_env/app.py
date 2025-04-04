@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional, Any, Dict
-from .interface import initialize_environment, close_environment, action_space_json_schema, get_task_prompt, tools_json_schema_openai, take_step
+from verl_agent_env.interface import initialize_environment, close_environment, action_space_json_schema, get_task_prompt, tools_json_schema_openai, take_step
 
 app = FastAPI()
 
