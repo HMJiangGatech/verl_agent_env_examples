@@ -1,3 +1,4 @@
+import json
 import gymnasium as gym
 from verl_agent_env.envs.base import LLMAgentEnv as Env
 from verl_agent_env import ALL_VERL_ENVS
@@ -130,6 +131,29 @@ def tools_json_schema_openai(env_id: str):
     
     return tools_schema
 
+def tools_json_schema_anthropic(env_id: str):
+    """
+    Retrieve the Anthropic tools JSON schema of the environment with the given ID.
+
+    Args:
+        env_id (str): The ID of the environment.
+
+    Returns:
+        list: The Anthropic tools JSON schema of the environment.
+
+    Raises:
+        KeyError: If the environment with the given ID is not found.
+    """
+    env: Env = environments.get(env_id, None)
+    
+    if env is None:
+        raise KeyError(f"Environment with ID '{env_id}' not found.")
+    
+    # Assuming the environment has a method or attribute `tools_json_schema_anthropic`
+    tools_schema = env.unwrapped.tools_json_schema_anthropic
+    
+    return tools_schema
+
 def take_step(env_id: str, action):
     """
     Take a step in the environment with the given ID using the specified action.
@@ -159,6 +183,54 @@ def take_step(env_id: str, action):
         "info": info
     }
 
+def convert_claude_action_to_openai_action(action):
+    """
+    Convert the action from Claude to OpenAI style.
+    """
+    text_content = ""
+    tool_calls = []
+    for c in action["content"]:
+        if c["type"] == "text":
+            assert text_content == "", "Only one text block is allowed"
+            text_content = c["text"]
+        elif c["type"] == "tool_use":
+            tool_calls.append({
+                "id": c["id"],
+                "type": "function",
+                "function": {
+                    "name": c["name"],
+                    "arguments": json.dumps(c["input"])
+                }
+            })
+    return {
+        "role": action["role"],
+        "content": text_content,
+        "tool_calls": tool_calls
+    }
+        
+def convert_openai_tool_obs_to_claude_obs(obs):
+    """
+    Convert the observation from OpenAI to Claude style.
+    """
+    claude_obs = []
+    for o in obs:
+        if o["role"] == "user":
+            claude_obs.append({
+                "type": "text",
+                "text": o["content"]
+            })
+        elif o["role"] == "tool":
+            claude_obs.append({
+                "type": "tool_result",
+                "tool_use_id": o["tool_call_id"],
+                "content": o["content"]
+            })
+    claude_obs = {
+        "role": "user",
+        "content": claude_obs
+    }
+    return claude_obs
+        
 # Simple test code
 if __name__ == "__main__":
     # Initialize an environment

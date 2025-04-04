@@ -1,3 +1,4 @@
+import copy
 import gymnasium as gym
 from gymnasium import Env
 from typing import List, Optional
@@ -10,32 +11,36 @@ class LLMAgentEnv(Env):
         super().__init__()
         # action and observation space is following https://platform.openai.com/docs/guides/function-calling?api-mode=chat
         # An example of action is:
-        # [
-        #     {
-        #         "id": "call_12345xyz",
-        #         "type": "function",
-        #         "function": {
-        #             "name": "get_weather",
-        #             "arguments": "{\"location\":\"Paris, France\"}"
+        # {
+        #     "role": "assistant",
+        #     "content": "Here are some thinking process",
+        #     "tool_calls": [
+        #         {
+        #             "id": "call_12345xyz",
+        #             "type": "function",
+        #             "function": {
+        #                 "name": "get_weather",
+        #                 "arguments": "{\"location\":\"Paris, France\"}"
+        #             }
+        #         },
+        #         {
+        #             "id": "call_67890abc",
+        #             "type": "function",
+        #             "function": {
+        #                 "name": "get_weather",
+        #                 "arguments": "{\"location\":\"Bogotá, Colombia\"}"
+        #             }
+        #         },
+        #         {
+        #             "id": "call_99999def",
+        #             "type": "function",
+        #             "function": {
+        #                 "name": "send_email",
+        #                 "arguments": "{\"to\":\"bob@email.com\",\"body\":\"Hi bob\"}"
+        #             }
         #         }
-        #     },
-        #     {
-        #         "id": "call_67890abc",
-        #         "type": "function",
-        #         "function": {
-        #             "name": "get_weather",
-        #             "arguments": "{\"location\":\"Bogotá, Colombia\"}"
-        #         }
-        #     },
-        #     {
-        #         "id": "call_99999def",
-        #         "type": "function",
-        #         "function": {
-        #             "name": "send_email",
-        #             "arguments": "{\"to\":\"bob@email.com\",\"body\":\"Hi bob\"}"
-        #         }
-        #     }
-        # ]
+        #     ]
+        # }
         self.action_space = gym.spaces.Dict({
             "role": gym.spaces.Text(16),
             "content": gym.spaces.Text(1024, charset=string.printable),
@@ -122,3 +127,18 @@ class LLMAgentEnv(Env):
             })
         return tools
     
+    @property
+    def tools_json_schema_anthropic(self):
+        """
+        Retrieve the tools json schema of the environment, and return the json schema.
+        This is built upon the action_space_json_schema, and is used for Anthropic function calling.
+        See https://docs.anthropic.com/en/docs/build-with-claude/tool-use/overview for more details.
+        """
+        schema = self.action_space_json_schema
+        tools = []
+        for tool in schema:
+            tool = copy.deepcopy(tool)
+            tool['input_schema'] = tool.pop('parameters')
+            tools.append(tool)
+        return tools
+

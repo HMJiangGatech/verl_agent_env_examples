@@ -85,8 +85,9 @@ class FrozenLakeEnv(LLMAgentEnv):
                     desc[i][j] = "F"
         row, col = self.frozen_lake_env.unwrapped.s // self.frozen_lake_env.unwrapped.ncol, self.frozen_lake_env.unwrapped.s % self.frozen_lake_env.unwrapped.ncol
         desc[row][col] = "P"
-        obs = "\n".join(["".join(row) for row in desc])
-        obs = "The current map of the world is: \n" + obs
+        obs = f"You are at position {row},{col} in the world.\n"
+        obs += "The current map of the world is: \n"
+        obs += "\n".join(["".join(row) for row in desc])
         
         if self._last_tool_call_id is not None:
             return (
