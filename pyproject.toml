@@ -22,6 +22,7 @@ dependencies = [
     "gymnasium>=1.1.1",
     "openai>=1.70.0",
     "boto3",
+    "imageio>=2.9.0",
 ]
 
 [project.optional-dependencies]

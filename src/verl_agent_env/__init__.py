@@ -18,3 +18,9 @@ gym.register(
     entry_point="verl_agent_env.envs.frozen_lake:FrozenLakeEnv",
 )
 ALL_VERL_ENVS.append("verl_env/frozen_lake-v1")
+
+gym.register(
+    id="verl_env/sokoban-v0",
+    entry_point="verl_agent_env.envs.sokoban.sokoban:SokobanEnv",
+)
+ALL_VERL_ENVS.append("verl_env/sokoban-v0")
