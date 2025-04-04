@@ -133,7 +133,7 @@ def take_step(env_id: str, action):
 
     Args:
         env_id (str): The ID of the environment.
-        action: The action to take in the environment.
+        action: The action to take in the environment. This is a message block following the OpenAI message format.
 
     Returns:
         dict: A dictionary containing the observation, reward, done status, truncated status, and additional info.

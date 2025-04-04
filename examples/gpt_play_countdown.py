@@ -31,27 +31,32 @@ print("Tools Schema:", tools_schema)
 print("\n\n###### Agent Loop ######\n\n")
 max_turns = 20
 
+messages = [
+    {"role": "system", "content": task_prompt},
+    {"role": "user", "content": "Start the game."}
+]
 for turn in range(max_turns):
-    messages = [
-        {"role": "system", "content": task_prompt},
-        {"role": "user", "content": "Start the game."}
-    ]
 
     completion = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4o",
         messages=messages,
         tools=tools_schema,
         parallel_tool_calls=False
     )
 
     message = completion.choices[0].message.to_dict()
+    message = {
+        "role": message['role'],
+        "content": message['content'],
+        "tool_calls": message['tool_calls'] if 'tool_calls' in message else []
+    }
     messages.append(message)
-    print("Message:", message['content'])
-    action = message['tool_calls']
-    print("Action:", json.dumps(action, indent=2))
-    result = interface.take_step(env_id, action)
-    print("Result:", result['observation'][0]['content'])
-    messages.append(result['observation'][0])
+    print("Message Content:\n", message['content'])
+    print("Message Tool Calls:\n", json.dumps(message['tool_calls'], indent=2))
+    result = interface.take_step(env_id, message)
+    if len(result['observation']) > 0:
+        print("Result:", result['observation'][0]['content'])
+        messages.append(result['observation'][0])
 
     if result['done'] or result['truncated']:
         break

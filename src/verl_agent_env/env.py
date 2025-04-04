@@ -36,20 +36,24 @@ class LLMAgentEnv(Env):
         #         }
         #     }
         # ]
-        self.action_space = gym.spaces.Sequence(
-            gym.spaces.Dict(
-                {
-                    "id": gym.spaces.Text(256, charset=string.printable),
-                    "type": gym.spaces.Text(16),
-                    "function": gym.spaces.Dict(
-                        {
-                            "name": gym.spaces.Text(1024, charset=string.printable),
-                            "arguments": gym.spaces.Text(1024, charset=string.printable)
-                        }
+        self.action_space = gym.spaces.Dict({
+            "role": gym.spaces.Text(16),
+            "content": gym.spaces.Text(1024, charset=string.printable),
+            "tool_calls": gym.spaces.Sequence(
+                gym.spaces.Dict(
+                    {
+                        "id": gym.spaces.Text(256, charset=string.printable),
+                        "type": gym.spaces.Text(16),
+                        "function": gym.spaces.Dict(
+                            {
+                                "name": gym.spaces.Text(1024, charset=string.printable),
+                                "arguments": gym.spaces.Text(1024, charset=string.printable)
+                            }
+                        )
+                    }
                     )
-                }
             )
-        )
+        })
 
         # An example of observation is:
         # [
@@ -261,8 +265,9 @@ class CountdownEnv(LLMAgentEnv):
         return observation, info
 
     def step(self, action):
+        action = action['tool_calls']
         if len(action) == 0:
-            return self._get_obs(), 0.0, True, False, self._get_info()
+            return [], 0.0, True, False, self._get_info()
         
         assert len(action) == 1, "Only one action is allowed"
         action = action[0]
