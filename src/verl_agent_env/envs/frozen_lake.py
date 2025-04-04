@@ -154,10 +154,18 @@ class FrozenLakeEnv(LLMAgentEnv):
             prompt += "More specifically, you will move in intended direction with probability of 1/3 else will move in either perpendicular direction with equal probability of 1/3 in both directions.\n"
             prompt += "For example, if you are at position [x,y] and you move left, you may end up at position [x,y-1] or [x-1,y] or [x+1,y] with equal probability.\n"
             
-        prompt += "Randomly generated worlds will always have a path to the goal."
+        prompt += "Randomly generated worlds will always have a path to the goal. "
         
-        prompt += "You will be given the current map of the world every time you move. It is a 2D grid where each cell is either the player's position, a hole, a frozen cell, or the goal."
+        prompt += "You will be given the current map of the world every time you move. It is a 2D grid where each cell is either the player's position, a hole, a frozen cell, or the goal. "
         prompt += "The letter 'P' represents the player's position, the letter 'G' represents the goal, the letter 'H' represents a hole, and the letter 'F' represents a frozen cell."
+        prompt += (
+            "\n\n"
+            "Here is the reward structure of the game:\n"
+            "- You will be rewarded 1 point for reaching the goal.\n"
+            "- You will be rewarded 0 points for moving in the ice.\n"
+            "- You will be rewarded 0 point for falling into a hole.\n"
+        )
+        
         return prompt
     
     @property

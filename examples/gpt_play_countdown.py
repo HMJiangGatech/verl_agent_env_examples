@@ -32,12 +32,12 @@ print("\n\n###### Agent Loop ######\n\n")
 max_turns = 20
 
 messages = [
-    {"role": "system", "content": task_prompt},
+    {"role": "system", "content": task_prompt + "\n\n" + "You need to generate step by step thought process and reason about your next action. You have to generate tool call for each turn."},
 ]
 for m in init_obj["observation"]:
     messages.append(m)
 for turn in range(max_turns):
-    print("## Turn:", turn)
+    print("\n## Turn:", turn)
 
     completion = client.chat.completions.create(
         model="gpt-4o",
@@ -69,3 +69,6 @@ for turn in range(max_turns):
 print("\n\n###### Close Environment ######\n\n")
 # Close the environment
 close_obj = interface.close_environment(env_id)
+
+print("\n\n###### Final Messages ######\n\n")
+print(json.dumps(messages, indent=2))
