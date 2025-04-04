@@ -7,14 +7,15 @@ from typing import Optional
 # A simple in-memory store for environments
 environments = {}
 
-def initialize_environment(env_name: str, seed: Optional[int] = None):
+def initialize_environment(env_name: str, seed: Optional[int] = None, env_kwargs: Optional[dict] = None):
     """
     Initialize a new environment with the given name and optional seed.
 
     Args:
         env_name (str): The name of the environment to initialize.
         seed (Optional[int]): An optional seed for the environment's random number generator.
-
+        env_kwargs (Optional[dict]): An optional dictionary of keyword arguments for the environment.
+        
     Returns:
         dict: A dictionary containing a success message, the environment ID, 
               the initial observation, and additional info.
@@ -28,7 +29,9 @@ def initialize_environment(env_name: str, seed: Optional[int] = None):
         if env_id not in environments:
             break
     
-    env: Env = gym.make(env_name)
+    if env_kwargs is None:
+        env_kwargs = {}
+    env: Env = gym.make(env_name, **env_kwargs)
     environments[env_id] = env
     observation, info = env.reset(seed=seed)
     return {

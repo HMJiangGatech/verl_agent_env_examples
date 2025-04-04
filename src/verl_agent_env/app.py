@@ -8,6 +8,7 @@ app = FastAPI()
 class InitializeRequest(BaseModel):
     env_name: str
     seed: Optional[int] = None
+    env_kwargs: Optional[Dict[str, Any]] = None
 
 class EnvironmentResponse(BaseModel):
     message: str
@@ -36,7 +37,7 @@ class StepResponse(BaseModel):
 
 @app.post("/api/environment/initialize", response_model=EnvironmentResponse)
 async def initialize_env(request: InitializeRequest):
-    return initialize_environment(request.env_name, request.seed)
+    return initialize_environment(request.env_name, request.seed, request.env_kwargs)
 
 @app.post("/api/environment/{env_id}/close", response_model=EnvironmentResponse)
 async def close_env(env_id: str):
