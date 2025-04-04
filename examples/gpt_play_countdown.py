@@ -14,7 +14,7 @@ client = OpenAI(api_key=key)
 
 # Initialize the environment
 print("\n\n###### Initialize Environment ######\n\n")
-init_obj = interface.initialize_environment("verl_env/countdown-v0")
+init_obj = interface.initialize_environment("verl_env/countdown-v0", env_kwargs={"num_operands": 3})
 env_id = init_obj["env_id"]
 print("Initialized Environment ID:", env_id)
 print("Initial Message:", init_obj["message"])
