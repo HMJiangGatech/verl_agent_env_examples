@@ -1,10 +1,10 @@
 from openai import OpenAI
 import json
-# Try to get key from environment variable first, fallback to file
 import os
 
 from verl_agent_env import interface
 
+# Try to get key from environment variable first, fallback to file
 key = os.getenv("OPENAI_KEY")
 if not key:
     with open(os.path.join(os.path.dirname(__file__), "OPENAI_KEY")) as f:
