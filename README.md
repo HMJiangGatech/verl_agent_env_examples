@@ -124,6 +124,7 @@ This will start the server on `http://127.0.0.1:8000`, and you can access the AP
 - [ ] Multi-Node Hosting
 - [ ] Implement sokoban
 - [x] Implement Countdown
+- [x] Implement Frozen Lake
 
 ## Example Usage
 
