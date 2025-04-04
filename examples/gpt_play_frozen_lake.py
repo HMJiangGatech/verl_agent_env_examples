@@ -14,7 +14,7 @@ client = OpenAI(api_key=key)
 
 # Initialize the environment
 print("\n\n###### Initialize Environment ######\n\n")
-init_obj = interface.initialize_environment("verl_env/countdown-v0", env_kwargs={"num_operands": 3})
+init_obj = interface.initialize_environment("verl_env/frozen_lake-v1", env_kwargs={"map_size": 8})
 env_id = init_obj["env_id"]
 print("Initialized Environment ID:", env_id)
 print("Initial Message:", init_obj["message"])
@@ -43,7 +43,8 @@ for turn in range(max_turns):
         model="gpt-4o",
         messages=messages,
         tools=tools_schema,
-        parallel_tool_calls=False
+        parallel_tool_calls=False,
+        tool_choice="required"
     )
 
     message = completion.choices[0].message.to_dict()

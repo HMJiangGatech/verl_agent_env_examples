@@ -12,3 +12,9 @@ gym.register(
     entry_point="verl_agent_env.envs.countdown:CountdownEnv",
 )
 ALL_VERL_ENVS.append("verl_env/countdown-v0")
+
+gym.register(
+    id="verl_env/frozen_lake-v1",
+    entry_point="verl_agent_env.envs.frozen_lake:FrozenLakeEnv",
+)
+ALL_VERL_ENVS.append("verl_env/frozen_lake-v1")

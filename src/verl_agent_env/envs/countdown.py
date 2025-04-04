@@ -1,15 +1,14 @@
+"""
+Environment for generating equations to reach a target number using given numbers and operations.
+Implementation adapted from https://github.com/Jiayi-Pan/TinyZero/blob/main/examples/data_preprocess/countdown.py
+"""
+
 import json
-import string
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from verl_agent_env.envs.base import LLMAgentEnv
 
 
 class CountdownEnv(LLMAgentEnv):
-    """
-    Environment for generating equations to reach a target number using given numbers and operations.
-    Implementation adapted from https://github.com/Jiayi-Pan/TinyZero/blob/main/examples/data_preprocess/countdown.py
-    """
-
     def __init__(self, 
                  num_operands: int = 6, 
                  max_target: int = 100, 
@@ -57,14 +56,19 @@ class CountdownEnv(LLMAgentEnv):
 
         self._attempts = []
 
-    def _get_obs(self) -> str:
+    def _get_obs(self) -> Tuple[dict, ...]:
         """Generate a string representation of the agent's attempts.
 
         Returns:
-            str: A string describing the equations tried by the agent and their results.
+            Tuple[dict, ...]: A tuple containing a dictionary with the tool response and results.
         """
         if len(self._attempts) == 0:
-            return ()
+            return (
+                {
+                    "role": "user",
+                    "content": "No attempts yet. Let's start!"
+                },
+            )
         obs_str = ""
         attempt = self._attempts[-1]
         if attempt['result'] in ['pass', 'fail']:

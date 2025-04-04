@@ -59,10 +59,32 @@ This project strictly follows the conventions of Gymnasium (previously OpenAI Gy
   observation, info = interface.reset(env_id)
   ```
 
+- **Step Through the Environment**
+  ```python
+  action = ...  # Define your action here
+  observation, reward, done, truncated, info = interface.step(env_id, action)
+  ```
+
 - **Close and Clean Up the Environment**
   ```python
   interface.close_environment(env_id)
   ```
+
+**Compatability with LLM Chat Message List**: To make the environment compatible with LLM Chat Message List, the `observation` are designed to be a list of dictionaries (messages) with the following keys:
+- `role`: The role of the message.
+- `content`: The content of the message.
+- (Optional) `tool_call_id`: The tool call id of the message. If the `role` is `tool`, the `tool_call_id` is the id of the tool call. If the `role` is `user`, there is no `tool_call_id`.
+
+The `action` is also directly compatible with the `messages` in the popular LLM API (e.g. OpenAI, Anthropic, etc.). More specifically, the `action` is a list of dictionaries with the following keys:
+- `role`: The role of the message, which is usually `assistant`.
+- `content`: The content of the message.
+- `tool_calls`: The tool calls of the message. This is a list of dictionaries with the following keys:
+  - `id`: The id of the tool call.
+  - `type`: The type of the tool call, which is usually `function`.
+  - `function`: The function of the tool call. This is a dictionary with the following keys:
+    - `name`: The name of the tool.
+    - `arguments`: The arguments of the tool call.
+
 
 ### 2. Service Endpoint
 
