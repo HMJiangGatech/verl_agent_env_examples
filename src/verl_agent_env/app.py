@@ -39,6 +39,10 @@ class ResetRequest(BaseModel):
     seed: Optional[int] = None
     options: Optional[Dict[str, Any]] = None
 
+class ResetEnvironmentResponse(BaseModel):
+    observation: Any = None
+    info: Dict[str, Any] = None
+
 @app.post("/api/environment/initialize", response_model=EnvironmentResponse)
 async def initialize_env(request: InitializeRequest):
     return initialize_environment(request.env_name, request.seed, request.env_kwargs)
@@ -79,6 +83,10 @@ async def take_step_endpoint(env_id: str, request: StepRequest):
     except KeyError as e:
         return {"message": str(e)}
 
-@app.post("/api/environment/{env_id}/reset", response_model=EnvironmentResponse)
+@app.post("/api/environment/{env_id}/reset", response_model=ResetEnvironmentResponse)
 async def reset_env(env_id: str, request: ResetRequest):
     return reset_environment(env_id, request.seed, request.options)
+
+@app.get("/")
+async def health_check():
+    return {"status": "running"}
