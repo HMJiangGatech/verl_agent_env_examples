@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List, Optional, Any, Dict
-from verl_agent_env.interface import initialize_environment, close_environment, action_space_json_schema, get_task_prompt, tools_json_schema_openai, take_step
+from verl_agent_env.interface import initialize_environment, close_environment, action_space_json_schema, get_task_prompt, tools_json_schema_openai, take_step, reset_environment
 
 app = FastAPI()
 
@@ -34,6 +34,10 @@ class StepResponse(BaseModel):
     done: bool
     truncated: bool
     info: Dict[str, Any]
+
+class ResetRequest(BaseModel):
+    seed: Optional[int] = None
+    options: Optional[Dict[str, Any]] = None
 
 @app.post("/api/environment/initialize", response_model=EnvironmentResponse)
 async def initialize_env(request: InitializeRequest):
@@ -73,4 +77,8 @@ async def take_step_endpoint(env_id: str, request: StepRequest):
         result = take_step(env_id, request.action)
         return result
     except KeyError as e:
-        return {"message": str(e)} 
+        return {"message": str(e)}
+
+@app.post("/api/environment/{env_id}/reset", response_model=EnvironmentResponse)
+async def reset_env(env_id: str, request: ResetRequest):
+    return reset_environment(env_id, request.seed, request.options)

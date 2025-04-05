@@ -41,6 +41,32 @@ def initialize_environment(env_name: str, seed: Optional[int] = None, env_kwargs
         "observation": observation,
         "info": info
     }
+    
+def reset_environment(env_id: str, seed: Optional[int] = None, options: Optional[dict] = None):
+    """
+    Reset the environment with the given ID and return the initial observation and additional info.
+
+    Args:
+        env_id (str): The ID of the environment to reset.
+        seed (Optional[int]): An optional seed for the environment's random number generator.
+        options (Optional[dict]): An optional dictionary of keyword arguments for the environment.
+
+    Returns:
+        dict: A dictionary containing the initial observation and additional info.
+
+    Raises:
+        KeyError: If the environment with the given ID is not found.
+    """
+    env: Env = environments.get(env_id, None)
+    
+    if env is None:
+        raise KeyError(f"Environment with ID '{env_id}' not found.")
+    
+    observation, info = env.reset(seed=seed, options=options)
+    return {
+        "observation": observation,
+        "info": info
+    }
 
 def close_environment(env_id: str):
     """

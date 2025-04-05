@@ -144,9 +144,14 @@ This will start the FastAPI server inside a Docker container, and it will be acc
 - [ ] Add docker container building logic
 - [ ] High Concurrency for supporting >= 10K batch size
 - [ ] Multi-Node Hosting
-- [ ] Implement sokoban
+- [x] Implement sokoban
 - [x] Implement Countdown
 - [x] Implement Frozen Lake
+- [ ] RL Example with VerL + sokoban
+    - [x] Data Curation
+    - [ ] Verl Dataset
+    - [ ] Verl Rollout
+    - [ ] Verl PPO Training
 
 ## Example Usage
 
