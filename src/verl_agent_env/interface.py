@@ -116,7 +116,7 @@ def tools_json_schema_openai(env_id: str):
         env_id (str): The ID of the environment.
 
     Returns:
-        dict: The tools JSON schema of the environment.
+        list: The tools JSON schema of the environment.
 
     Raises:
         KeyError: If the environment with the given ID is not found.

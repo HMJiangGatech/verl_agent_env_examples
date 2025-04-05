@@ -116,6 +116,28 @@ uvicorn src.verl_agent_env.app:app --reload
 
 This will start the server on `http://127.0.0.1:8000`, and you can access the API documentation at `http://127.0.0.1:8000/docs`.
 
+## Docker Setup
+
+To serve the FastAPI application using Docker, follow these steps:
+
+### Build the Docker Image
+
+1. Ensure Docker is installed and running on your machine.
+2. Navigate to the root directory of the project where the `Dockerfile` is located.
+3. Build the Docker image using the following command:
+   ```bash
+   docker build -t verl-agent-env .
+   ```
+
+### Run the Docker Container
+
+1. Run the Docker container using the following command:
+   ```bash
+   docker run -p 8000:8000 verl-agent-env
+   ```
+
+This will start the FastAPI server inside a Docker container, and it will be accessible at `http://localhost:8000`. You can access the API documentation at `http://localhost:8000/docs`.
+
 ## TODO List
 
 - [ ] Add serving code
