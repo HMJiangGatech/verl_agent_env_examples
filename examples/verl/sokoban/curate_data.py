@@ -1,28 +1,42 @@
 import pandas as pd
 import os
+import json
+from tqdm import tqdm
+from verl_agent_env.envs.sokoban.sokoban import SokobanEnv
+
+import ray
+
+ray.init(num_cpus=75)
 
 # create agent env data
-num_train = 100000
-num_test = 250
+num_train = 10000
+num_test = 100
 
-train_df = [
-    {
+@ray.remote
+def create_env_data(seed, offset=0):
+    env = SokobanEnv()
+    env.reset(seed=seed + offset)
+    room_setup = env.serialize_room()
+    return {
         "env_name": 'verl_env/sokoban-v0',
-        "seed": i,
-        "env_kwargs": None
-    } for i in range(num_train)
-]
+        "seed": seed + offset,
+        "env_kwargs": json.dumps({'room_setup': room_setup})
+    }
 
-test_df = [
-    {
-        "env_name": 'verl_env/sokoban-v0',
-        "seed": i + num_train,
-        "env_kwargs": None
-    } for i in range(num_test)
-]
+# Parallelize train data creation
+print("Creating training data...")
+train_futures = [create_env_data.remote(i) for i in range(num_train)]
+train_data = []
+for batch in tqdm(range(0, len(train_futures), 100)):
+    batch_results = ray.get(train_futures[batch:batch+100])
+    train_data.extend(batch_results)
+train_df = pd.DataFrame(train_data)
 
-train_df = pd.DataFrame(train_df)
-test_df = pd.DataFrame(test_df)
+# Parallelize test data creation
+print("Creating test data...")
+test_futures = [create_env_data.remote(i, offset=num_train) for i in range(num_test)]
+test_data = ray.get(test_futures)
+test_df = pd.DataFrame(test_data)
 
 os.makedirs('data', exist_ok=True)
 
