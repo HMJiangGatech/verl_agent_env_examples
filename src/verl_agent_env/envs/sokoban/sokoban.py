@@ -4,6 +4,7 @@ https://github.com/RAGEN-AI/RAGEN/blob/main/ragen/env/sokoban/env.py
 https://github.com/mpSchrader/gym-sokoban/tree/default
 """
 
+import copy
 from typing import Optional, Tuple
 import gymnasium as gym
 import numpy as np
@@ -23,7 +24,8 @@ class SokobanEnv(LLMAgentEnv):
                  dim_room=(10, 10),
                  max_steps=120,
                  num_boxes=4,
-                 num_gen_steps=None):
+                 num_gen_steps=None,
+                 room_setup=None):
         super().__init__()
 
         # General Configuration
@@ -52,7 +54,10 @@ class SokobanEnv(LLMAgentEnv):
         # self.observation_space = gym.spaces.Box(low=0, high=255, shape=(screen_height, screen_width, 3), dtype=np.uint8)
         
         # Initialize Room
-        _ = self.reset()
+        if room_setup is not None:
+            _ = self.reset(options={"room_setup": room_setup})
+        else:
+            _ = self.reset()
         
         self._action_space_json_schema = []
         self._tool_name_action_id_map = {}
@@ -266,20 +271,69 @@ class SokobanEnv(LLMAgentEnv):
 
     def _check_if_maxsteps(self):
         return (self.max_steps == self.num_env_steps)
+    
+    def serialize_room(self):
+        # Convert tuple keys in box_mapping to strings for serialization
+        serialized_box_mapping = {}
+        for key, value in self.box_mapping.items():
+            assert isinstance(key, tuple)
+            serialized_box_mapping[str(key)] = [int(cell) for cell in value]
+        
+        # Convert NumPy arrays to native Python lists of lists of integers
+        room_fixed_list = []
+        room_state_list = []
+        
+        for row in self.room_fixed:
+            room_fixed_list.append([int(cell) for cell in row])
+            
+        for row in self.room_state:
+            room_state_list.append([int(cell) for cell in row])
+                
+        return {
+            "room_fixed": room_fixed_list,
+            "room_state": room_state_list,
+            "box_mapping": serialized_box_mapping
+        }
+    
+    def deserialize_room(self, room_dict):
+        # Convert lists of lists to NumPy arrays
+        self.room_fixed = np.array(room_dict["room_fixed"], dtype=np.int8)
+        self.room_state = np.array(room_dict["room_state"], dtype=np.int8)
+        
+        # Convert string keys back to tuples during deserialization
+        deserialized_box_mapping = {}
+        for key, value in room_dict["box_mapping"].items():
+            assert key.startswith('(') and key.endswith(')')
+            # Parse string representation of tuple back to actual tuple
+            # Format is like '(1, 2)' to (1, 2)
+            # Extract numbers from the string
+            nums = key.strip('()').split(',')
+            # Convert to integers and create tuple
+            tuple_key = tuple(int(num.strip()) for num in nums)
+            deserialized_box_mapping[tuple_key] = value
+                
+        self.box_mapping = deserialized_box_mapping
+        
+        assert self.room_fixed.shape == self.dim_room
+        assert self.room_state.shape == self.dim_room
+        assert len(self.box_mapping) == self.num_boxes
 
     def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
         super().reset(seed=seed, options=options)
-        try:
-            self.room_fixed, self.room_state, self.box_mapping = generate_room(
-                dim=self.dim_room,
-                num_steps=self.num_gen_steps,
-                num_boxes=self.num_boxes,
-                second_player=options.get("second_player", False) if options is not None else False
-            )
-        except (RuntimeError, RuntimeWarning) as e:
-            print("[SOKOBAN] Runtime Error/Warning: {}".format(e))
-            print("[SOKOBAN] Retry . . .")
-            return self.reset(seed=seed, options=options)
+        if options is not None and options.get("room_setup", None) is not None:
+            self.deserialize_room(options["room_setup"])
+        else:
+            try:
+                self.room_fixed, self.room_state, self.box_mapping = generate_room(
+                    dim=self.dim_room,
+                    num_steps=self.num_gen_steps,
+                    num_boxes=self.num_boxes,
+                    second_player=options.get("second_player", False) if options is not None else False
+                )
+            except (RuntimeError, RuntimeWarning) as e:
+                print("[SOKOBAN] Runtime Error/Warning: {}".format(e))
+                print("[SOKOBAN] Retry . . .")
+                return self.reset(seed=seed, options=options)
 
         self.player_position = np.argwhere(self.room_state == 5)[0]
         self.num_env_steps = 0

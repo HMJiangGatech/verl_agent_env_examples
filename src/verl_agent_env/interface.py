@@ -34,7 +34,7 @@ def initialize_environment(env_name: str, seed: Optional[int] = None, env_kwargs
         env_kwargs = {}
     env: Env = gym.make(env_name, **env_kwargs)
     environments[env_id] = env
-    observation, info = env.reset(seed=seed)
+    observation, info = env.reset(seed=seed, options=env_kwargs)
     return {
         "message": f"Environment '{env_name}' initialized successfully.",
         "env_id": env_id,
