@@ -84,7 +84,7 @@ def close_environment(env_id: str):
         env.close()
         return {"message": f"Environment with ID '{env_id}' closed successfully."}
     else:
-        raise KeyError(f"Environment with ID '{env_id}' not found.")
+        return {"message": f"Environment with ID '{env_id}' not found."}
     
 def action_space_json_schema(env_id: str):
     """
