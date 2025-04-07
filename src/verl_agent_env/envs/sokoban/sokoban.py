@@ -77,7 +77,7 @@ class SokobanEnv(LLMAgentEnv):
             })
             self._tool_name_action_id_map[func_name] = action_key
     
-    def _get_obs(self) -> Tuple[dict, ...]:
+    def _get_obs(self, error_msg: Optional[str] = None) -> Tuple[dict, ...]:
         arr_walls, arr_goals, arr_boxes, arr_player = self.render(mode='raw')
         # construct the map
         # step 1, set the floor
@@ -103,8 +103,12 @@ class SokobanEnv(LLMAgentEnv):
             grid_map_str += "\n"
         grid_map_str = grid_map_str.rstrip()
         
+        if error_msg is not None:
+            obs = f"There some ERROR occurred . The error message is: {error_msg}\n"
+        else:
+            obs = ""
         if self._last_tool_call_id is not None:
-            obs = f"After the action, the map of the world is: \n{grid_map_str}\n You are at position {self.player_position[0]},{self.player_position[1]} in the world."
+            obs += f"After the action, the map of the world is: \n{grid_map_str}\n You are at position {self.player_position[0]},{self.player_position[1]} in the world."
             return (
                 {
                     "role": "tool",
@@ -113,7 +117,7 @@ class SokobanEnv(LLMAgentEnv):
                 },
             )
         else:
-            obs = f"The current map of the world is: \n{grid_map_str}\n You are at position {self.player_position[0]},{self.player_position[1]} in the world."
+            obs += f"The current map of the world is: \n{grid_map_str}\n You are at position {self.player_position[0]},{self.player_position[1]} in the world."
             return (
                 {
                     "role": "user",
@@ -123,11 +127,13 @@ class SokobanEnv(LLMAgentEnv):
     
     def step(self, action):
         action = action['tool_calls']
+        error_msg = None
         if len(action) == 0:
             self._last_tool_call_id = None
             action = 0
         else:
-            assert len(action) == 1, "Only one action is allowed"
+            if len(action) > 1:
+                error_msg = f"You can only take one action at a time. But you tried to take {len(action)} actions at the same time. So we will only take the first action."
             self._last_tool_call_id = action[0]['id']
             action = action[0]['function']
             action = self._tool_name_action_id_map[action['name']]
@@ -162,7 +168,7 @@ class SokobanEnv(LLMAgentEnv):
             info["maxsteps_used"] = self._check_if_maxsteps()
             info["all_boxes_on_target"] = self._check_if_all_boxes_on_target()
 
-        return self._get_obs(), self.reward_last, done, False, info
+        return self._get_obs(error_msg), self.reward_last, done, False, info
 
     def _push(self, action):
         """
