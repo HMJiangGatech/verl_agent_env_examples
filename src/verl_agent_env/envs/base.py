@@ -87,6 +87,7 @@ class LLMAgentEnv(Env):
                 }
             )
         )
+        self.allow_parallel_tool_call = False # By default, it does not support parallel tool call.
 
 
     @property

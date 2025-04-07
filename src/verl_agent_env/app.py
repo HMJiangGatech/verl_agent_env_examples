@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List, Optional, Any, Dict
-from verl_agent_env.interface import initialize_environment, close_environment, action_space_json_schema, get_task_prompt, tools_json_schema_openai, take_step, reset_environment
+from verl_agent_env.interface import initialize_environment, close_environment, action_space_json_schema, get_task_prompt, tools_json_schema_openai, take_step, reset_environment, allow_parallel_tool_call
 
 app = FastAPI()
 
@@ -21,6 +21,9 @@ class ActionSpaceResponse(BaseModel):
 
 class TaskPromptResponse(BaseModel):
     task_prompt: str
+
+class AllowParallelToolCallResponse(BaseModel):
+    allow_parallel_tool_call: bool
 
 class OpenAIToolsSchemaResponse(BaseModel):
     tools_schema: List[Dict[str, Any]]
@@ -64,6 +67,14 @@ async def get_task_prompt_endpoint(env_id: str):
     try:
         task_prompt = get_task_prompt(env_id)
         return {"task_prompt": task_prompt}
+    except KeyError as e:
+        return {"message": str(e)}
+
+@app.get("/api/environment/{env_id}/allow-parallel-tool-call", response_model=AllowParallelToolCallResponse)
+async def get_allow_parallel_tool_call_endpoint(env_id: str):
+    try:
+        parallel_tool_call = allow_parallel_tool_call(env_id)
+        return {"allow_parallel_tool_call": parallel_tool_call}
     except KeyError as e:
         return {"message": str(e)}
 

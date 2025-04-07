@@ -134,6 +134,13 @@ def get_task_prompt(env_id: str):
     
     return task_prompt
 
+def allow_parallel_tool_call(env_id: str):
+    """
+    Retrieve the allow_parallel_tool_call of the environment with the given ID.
+    """
+    env: Env = environments.get(env_id, None)
+    return env.unwrapped.allow_parallel_tool_call
+
 def tools_json_schema_openai(env_id: str):
     """
     Retrieve the tools JSON schema of the environment with the given ID.
