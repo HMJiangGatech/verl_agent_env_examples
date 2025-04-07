@@ -133,7 +133,7 @@ class SokobanEnv(LLMAgentEnv):
             action = 0
         else:
             if len(action) > 1:
-                error_msg = f"You can only take one action at a time. But you tried to take {len(action)} actions at the same time. So we will only take the first action."
+                error_msg = f"You can only take one action at a time. But you tried to take {len(action)} actions at the same time. So we will only take the first action: {action[0]['function']}"
             self._last_tool_call_id = action[0]['id']
             action = action[0]['function']
             action = self._tool_name_action_id_map[action['name']]
