@@ -16,7 +16,16 @@ base_url = "http://localhost:8000/api"
 
 # Initialize the environment
 print("\n\n###### Initialize Environment ######\n\n")
-init_response = requests.post(f"{base_url}/environment/initialize", json={"env_name": "verl_env/sokoban-v0"})
+init_response = requests.post(
+    f"{base_url}/environment/initialize", 
+    json={
+        "env_name": "verl_env/sokoban-v0", 
+        "env_kwargs": {
+            "dim_room": [5, 5],
+            "num_boxes": 1
+        }
+    }
+)
 init_obj = init_response.json()
 env_id = init_obj["env_id"]
 print("Initialized Environment ID:", env_id)
