@@ -29,7 +29,7 @@ class SokobanEnv(LLMAgentEnv):
         super().__init__()
 
         # General Configuration
-        self.dim_room = dim_room
+        self.dim_room = tuple(dim_room)
         if num_gen_steps == None:
             self.num_gen_steps = int(1.7 * (dim_room[0] + dim_room[1]))
         else:
@@ -320,8 +320,8 @@ class SokobanEnv(LLMAgentEnv):
                 
         self.box_mapping = deserialized_box_mapping
         
-        assert self.room_fixed.shape == self.dim_room
-        assert self.room_state.shape == self.dim_room
+        assert self.room_fixed.shape == self.dim_room, f"{self.room_fixed.shape=} {self.dim_room=}"
+        assert self.room_state.shape == self.dim_room, f"{self.room_state.shape=} {self.dim_room=}"
         assert len(self.box_mapping) == self.num_boxes
 
     def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
