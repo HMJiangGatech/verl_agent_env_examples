@@ -1,5 +1,5 @@
 set -x
-export MLFLOW_TRACKING_URI=https://prod.us-east-1.internal.mlflow.nile.amazon.dev
+export MLFLOW_TRACKING_URI=https://your.mlflow.uri
 python3 -m verl.trainer.main_agent_ppo \
     algorithm.adv_estimator=gae \
     env.environment_endpoint=http://localhost:8000 \
