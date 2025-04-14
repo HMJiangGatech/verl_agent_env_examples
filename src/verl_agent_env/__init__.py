@@ -24,3 +24,9 @@ gym.register(
     entry_point="verl_agent_env.envs.sokoban.sokoban:SokobanEnv",
 )
 ALL_VERL_ENVS.append("verl_env/sokoban-v0")
+
+gym.register(
+    id="verl_env/single_turn_chat-v0",
+    entry_point="verl_agent_env.envs.single_turn_chat:SingleTurnChatEnv",
+)
+ALL_VERL_ENVS.append("verl_env/single_turn_chat-v0")
