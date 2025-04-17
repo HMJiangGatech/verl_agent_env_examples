@@ -1,7 +1,3 @@
-"""
-Adapted from https://gymnasium.farama.org/environments/toy_text/frozen_lake/
-"""
-
 from typing import Optional, Tuple, List, Dict, Any
 from verl_agent_env.envs.base import LLMAgentEnv
 
