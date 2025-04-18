@@ -179,27 +179,27 @@ if __name__ == "__main__":
     print(obs)
     print(info)
     action = {
-        "role": "tool",
+        "role": "assistant",
         "content": "",
-        "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_left"}}]
+        "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_left", "arguments": "{}"}}]
     }
     print(env.step(action))
     action = {
-        "role": "tool",
+        "role": "assistant",
         "content": "",
-        "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_right"}}]
+        "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_right", "arguments": "{}"}}]
     }
     print(env.step(action))
     action = {
-        "role": "tool",
+        "role": "assistant",
         "content": "",
-        "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_up"}}]
+        "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_up", "arguments": "{}"}}]
     }
     print(env.step(action))
     action = {
-        "role": "tool",
+        "role": "assistant",
         "content": "",
-        "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_down"}}]
+        "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_down", "arguments": "{}"}}]
     }
     print(env.step(action))
     

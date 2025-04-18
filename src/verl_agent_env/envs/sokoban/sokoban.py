@@ -530,7 +530,7 @@ if __name__ == "__main__":
     print(info)
 
     action = {
-        "role": "tool",
+        "role": "assistant",
         "content": "",
         "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_down"}}]
     }
@@ -542,7 +542,7 @@ if __name__ == "__main__":
     print(f"{info=}")
     
     action = {
-        "role": "tool",
+        "role": "assistant",
         "content": "",
         "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_right"}}]
     }
@@ -554,7 +554,7 @@ if __name__ == "__main__":
     print(f"{info=}")
     
     action = {
-        "role": "tool",
+        "role": "assistant",
         "content": "",
         "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_up"}}]
     }
@@ -566,7 +566,7 @@ if __name__ == "__main__":
     print(f"{info=}")
     
     action = {
-        "role": "tool",
+        "role": "assistant",
         "content": "",
         "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_left"}}]
     }
