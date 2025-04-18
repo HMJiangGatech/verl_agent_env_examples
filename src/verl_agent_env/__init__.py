@@ -30,3 +30,12 @@ gym.register(
     entry_point="verl_agent_env.envs.single_turn_chat:SingleTurnChatEnv",
 )
 ALL_VERL_ENVS.append("verl_env/single_turn_chat-v0")
+
+# check if src/verl_agent_env/amzn_env/__init__.py exists
+# if it does, import and register all the environments in that file
+try:
+    from verl_agent_env.amzn_env import INTERNAL_AMZN_VERL_ENVS
+    for env in INTERNAL_AMZN_VERL_ENVS:
+        ALL_VERL_ENVS.append(env)
+except ImportError:
+    pass
