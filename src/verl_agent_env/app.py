@@ -48,11 +48,11 @@ class ResetEnvironmentResponse(BaseModel):
 
 @app.post("/api/environment/initialize", response_model=EnvironmentResponse)
 async def initialize_env(request: InitializeRequest):
-    return initialize_environment(request.env_name, request.seed, request.env_kwargs)
+    return await initialize_environment(request.env_name, request.seed, request.env_kwargs)
 
 @app.post("/api/environment/{env_id}/close", response_model=EnvironmentResponse)
 async def close_env(env_id: str):
-    return close_environment(env_id)
+    return await close_environment(env_id)
 
 @app.get("/api/environment/{env_id}/action-space", response_model=ActionSpaceResponse)
 async def get_action_space(env_id: str):
@@ -89,14 +89,14 @@ async def get_openai_tools_schema(env_id: str):
 @app.post("/api/environment/{env_id}/step", response_model=StepResponse)
 async def take_step_endpoint(env_id: str, request: StepRequest):
     try:
-        result = take_step(env_id, request.action)
+        result = await take_step(env_id, request.action)
         return result
     except KeyError as e:
         return {"message": str(e)}
 
 @app.post("/api/environment/{env_id}/reset", response_model=ResetEnvironmentResponse)
 async def reset_env(env_id: str, request: ResetRequest):
-    return reset_environment(env_id, request.seed, request.options)
+    return await reset_environment(env_id, request.seed, request.options)
 
 @app.get("/")
 async def health_check():
