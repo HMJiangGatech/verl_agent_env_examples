@@ -149,9 +149,10 @@ This will start the FastAPI server inside a Docker container, and it will be acc
 - [x] Implement Frozen Lake
 - [ ] RL Example with VerL + sokoban
     - [x] Data Curation
-    - [ ] Verl Dataset
-    - [ ] Verl Rollout
-    - [ ] Verl PPO Training
+    - [x] Verl Dataset
+    - [x] Verl Rollout
+    - [x] Verl PPO Training
+- [ ] MCP Env
 
 ## Example Usage
 
