@@ -101,7 +101,7 @@ class CountdownEnv(LLMAgentEnv):
             "target_equation": self._target_equation,
         }
 
-    def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
+    async def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
         """Reset the environment to a new random state.
 
         Args:
@@ -110,7 +110,7 @@ class CountdownEnv(LLMAgentEnv):
         Returns:
             Tuple[str, dict]: The initial observation and information about the environment.
         """
-        super().reset(seed=seed)
+        await super().reset(seed=seed)
 
         # Generate random numbers between 1 and 9
         self._numbers = self.np_random.integers(1, 10, size=self.num_operands)
@@ -149,7 +149,7 @@ class CountdownEnv(LLMAgentEnv):
 
         return observation, info
 
-    def step(self, action):
+    async def step(self, action):
         action = action['tool_calls']
         if len(action) == 0:
             return [], 0.0, True, False, self._get_info()

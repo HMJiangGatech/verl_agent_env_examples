@@ -1,3 +1,4 @@
+import asyncio
 from typing import Optional, Tuple, List, Dict, Any
 from verl_agent_env.envs.base import LLMAgentEnv
 
@@ -18,10 +19,10 @@ class SingleTurnChatEnv(LLMAgentEnv):
     def _get_info(self) -> dict:
         return {}
     
-    def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
+    async def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
         return self.chat_history, self._get_info()
     
-    def step(self, action):
+    async def step(self, action):
         reward = 0
         
         return [], reward, True, True, self._get_info()
@@ -36,26 +37,28 @@ class SingleTurnChatEnv(LLMAgentEnv):
         return self._action_space_json_schema
     
 if __name__ == "__main__":
-    env = SingleTurnChatEnv(chat_history=[
-        {
-            "role": "user",
-            "content": "Hello, how are you?",
-        },
-        {
+    async def main():
+        env = SingleTurnChatEnv(chat_history=[
+            {
+                "role": "user",
+                "content": "Hello, how are you?",
+            },
+            {
+                "role": "assistant",
+                "content": "I'm good, thank you!",
+            },
+            {
+                "role": "user",
+                "content": "What is the weather in Tokyo?",
+            }
+        ])
+        obs, info = await env.reset()
+        print(obs)
+        print(info)
+        action = {
             "role": "assistant",
-            "content": "I'm good, thank you!",
-        },
-        {
-            "role": "user",
-            "content": "What is the weather in Tokyo?",
+            "content": "The weather in Tokyo is sunny today.",
         }
-    ])
-    obs, info = env.reset()
-    print(obs)
-    print(info)
-    action = {
-        "role": "assistant",
-        "content": "The weather in Tokyo is sunny today.",
-    }
-    print(env.step(action))
-    
+        print(await env.step(action))
+        
+    asyncio.run(main())

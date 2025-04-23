@@ -1,5 +1,5 @@
 import json
-import gymnasium as gym
+import asyncio
 from verl_agent_env.envs.base import LLMAgentEnv as Env
 from verl_agent_env import ALL_VERL_ENVS
 import uuid
@@ -8,7 +8,7 @@ from typing import Optional
 # A simple in-memory store for environments
 environments = {}
 
-def initialize_environment(env_name: str, seed: Optional[int] = None, env_kwargs: Optional[dict] = None):
+async def initialize_environment(env_name: str, seed: Optional[int] = None, env_kwargs: Optional[dict] = None):
     """
     Initialize a new environment with the given name and optional seed.
 
@@ -32,9 +32,9 @@ def initialize_environment(env_name: str, seed: Optional[int] = None, env_kwargs
     
     if env_kwargs is None:
         env_kwargs = {}
-    env: Env = gym.make(env_name, **env_kwargs)
+    env: Env = ALL_VERL_ENVS[env_name](**env_kwargs)
     environments[env_id] = env
-    observation, info = env.reset(seed=seed, options=env_kwargs)
+    observation, info = await env.reset(seed=seed, options=env_kwargs)
     return {
         "message": f"Environment '{env_name}' initialized successfully.",
         "env_id": env_id,
@@ -42,7 +42,7 @@ def initialize_environment(env_name: str, seed: Optional[int] = None, env_kwargs
         "info": info
     }
     
-def reset_environment(env_id: str, seed: Optional[int] = None, options: Optional[dict] = None):
+async def reset_environment(env_id: str, seed: Optional[int] = None, options: Optional[dict] = None):
     """
     Reset the environment with the given ID and return the initial observation and additional info.
 
@@ -62,13 +62,13 @@ def reset_environment(env_id: str, seed: Optional[int] = None, options: Optional
     if env is None:
         raise KeyError(f"Environment with ID '{env_id}' not found.")
     
-    observation, info = env.reset(seed=seed, options=options)
+    observation, info = await env.reset(seed=seed, options=options)
     return {
         "observation": observation,
         "info": info
     }
 
-def close_environment(env_id: str):
+async def close_environment(env_id: str):
     """
     Close the environment with the given ID.
 
@@ -81,7 +81,7 @@ def close_environment(env_id: str):
     """
     env: Env = environments.pop(env_id, None)
     if env is not None:
-        env.close()
+        await env.close()
         return {"message": f"Environment with ID '{env_id}' closed successfully."}
     else:
         return {"message": f"Environment with ID '{env_id}' not found."}
@@ -187,7 +187,7 @@ def tools_json_schema_anthropic(env_id: str):
     
     return tools_schema
 
-def take_step(env_id: str, action):
+async def take_step(env_id: str, action):
     """
     Take a step in the environment with the given ID using the specified action.
 
@@ -206,7 +206,7 @@ def take_step(env_id: str, action):
     if env is None:
         raise KeyError(f"Environment with ID '{env_id}' not found.")
     
-    observation, reward, done, truncated, info = env.step(action)
+    observation, reward, done, truncated, info = await env.step(action)
     
     return {
         "observation": observation,
@@ -266,18 +266,21 @@ def convert_openai_tool_obs_to_claude_obs(obs):
         
 # Simple test code
 if __name__ == "__main__":
-    # Initialize an environment
-    result = initialize_environment("verl_env/countdown-v0", seed=42)
-    print("Initialize Result:", result)
+    async def main():
+        # Initialize an environment
+        result = await initialize_environment("verl_env/countdown-v0", seed=42)
+        print("Initialize Result:", result)
 
-    # Get action space
-    tool_schema = action_space_json_schema(result["env_id"])
-    print("Action Space:", tool_schema)
+        # Get action space
+        tool_schema = action_space_json_schema(result["env_id"])
+        print("Action Space:", tool_schema)
 
-    # Get task prompt
-    task_prompt = get_task_prompt(result["env_id"])
-    print("Task Prompt:", task_prompt)
+        # Get task prompt
+        task_prompt = get_task_prompt(result["env_id"])
+        print("Task Prompt:", task_prompt)
 
-    # Close the environment
-    close_result = close_environment(result["env_id"])
-    print("Close Result:", close_result) 
+        # Close the environment
+        close_result = await close_environment(result["env_id"])
+        print("Close Result:", close_result) 
+
+    asyncio.run(main())

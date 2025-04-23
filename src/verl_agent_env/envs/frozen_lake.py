@@ -2,6 +2,7 @@
 Adapted from https://gymnasium.farama.org/environments/toy_text/frozen_lake/
 """
 
+import asyncio
 from typing import Optional, Tuple
 import gymnasium as gym
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
@@ -108,15 +109,15 @@ class FrozenLakeEnv(LLMAgentEnv):
     def _get_info(self) -> dict:
         return {}
     
-    def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
-        super().reset(seed=seed)
+    async def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
+        await super().reset(seed=seed)
         desc = generate_random_map(size=self.map_size, p=self.frozen_prob, seed=seed)
         self.frozen_lake_env = gym.make("FrozenLake-v1", desc=desc, map_name=None, is_slippery=self._is_slippery, render_mode="ansi")
         self.frozen_lake_env.reset(seed=seed)
         self._last_tool_call_id = None
         return self._get_obs(), self._get_info()
     
-    def step(self, action):
+    async def step(self, action):
         action = action['tool_calls']
         if len(action) == 0:
             return [], 0.0, True, False, self._get_info()
@@ -174,32 +175,33 @@ class FrozenLakeEnv(LLMAgentEnv):
         return self._action_space_json_schema
     
 if __name__ == "__main__":
-    env = FrozenLakeEnv()
-    obs, info = env.reset()
-    print(obs)
-    print(info)
-    action = {
-        "role": "assistant",
-        "content": "",
-        "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_left", "arguments": "{}"}}]
-    }
-    print(env.step(action))
-    action = {
-        "role": "assistant",
-        "content": "",
-        "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_right", "arguments": "{}"}}]
-    }
-    print(env.step(action))
-    action = {
-        "role": "assistant",
-        "content": "",
-        "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_up", "arguments": "{}"}}]
-    }
-    print(env.step(action))
-    action = {
-        "role": "assistant",
-        "content": "",
-        "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_down", "arguments": "{}"}}]
-    }
-    print(env.step(action))
-    
+    async def main():
+        env = FrozenLakeEnv()
+        obs, info = await env.reset()
+        print(obs)
+        print(info)
+        action = {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_left", "arguments": "{}"}}]
+        }
+        print(await env.step(action))
+        action = {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_right", "arguments": "{}"}}]
+        }
+        print(await env.step(action))
+        action = {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_up", "arguments": "{}"}}]
+        }
+        print(await env.step(action))
+        action = {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_down", "arguments": "{}"}}]
+        }
+        print(await env.step(action))
+    asyncio.run(main())

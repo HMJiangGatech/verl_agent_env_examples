@@ -89,6 +89,26 @@ class LLMAgentEnv(Env):
         )
         self.allow_parallel_tool_call = False # By default, it does not support parallel tool call.
 
+    async def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
+        """
+        Reset the environment.
+        # TODO: risky as the original reset method in gymnasium is not async
+        """
+        pass
+    
+    async def step(self, action):
+        """
+        Take a step in the environment.
+        # TODO: risky as the original step method in gymnasium is not async
+        """
+        raise NotImplementedError("step method is not implemented")
+    
+    async def close(self):
+        """
+        Close the environment.
+        # TODO: risky as the original close method in gymnasium is not async
+        """
+        pass
 
     @property
     def task_prompt(self) -> str:

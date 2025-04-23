@@ -5,6 +5,7 @@ https://github.com/mpSchrader/gym-sokoban/tree/default
 """
 
 import copy
+import asyncio
 from typing import Optional, Tuple
 import gymnasium as gym
 import numpy as np
@@ -53,11 +54,8 @@ class SokobanEnv(LLMAgentEnv):
         # self.action_space = gym.spaces.Discrete(len(ACTION_LOOKUP))
         # self.observation_space = gym.spaces.Box(low=0, high=255, shape=(screen_height, screen_width, 3), dtype=np.uint8)
         
-        # Initialize Room
-        if room_setup is not None:
-            _ = self.reset(options={"room_setup": room_setup})
-        else:
-            _ = self.reset()
+        # Save Room Setup
+        self.room_setup = room_setup
         
         self._action_space_json_schema = []
         self._tool_name_action_id_map = {}
@@ -125,7 +123,7 @@ class SokobanEnv(LLMAgentEnv):
                 },
             )
     
-    def step(self, action):
+    async def step(self, action):
         action = action['tool_calls']
         error_msg = None
         if len(action) == 0:
@@ -324,10 +322,12 @@ class SokobanEnv(LLMAgentEnv):
         assert self.room_state.shape == self.dim_room, f"{self.room_state.shape=} {self.dim_room=}"
         assert len(self.box_mapping) == self.num_boxes
 
-    def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
-        super().reset(seed=seed, options=options)
+    async def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
+        await super().reset(seed=seed, options=options)
         if options is not None and options.get("room_setup", None) is not None:
             self.deserialize_room(options["room_setup"])
+        elif self.room_setup is not None:
+            self.deserialize_room(self.room_setup)
         else:
             try:
                 self.room_fixed, self.room_state, self.box_mapping = generate_room(
@@ -339,7 +339,7 @@ class SokobanEnv(LLMAgentEnv):
             except (RuntimeError, RuntimeWarning) as e:
                 print("[SOKOBAN] Runtime Error/Warning: {}".format(e))
                 print("[SOKOBAN] Retry . . .")
-                return self.reset(seed=seed, options=options)
+                return await self.reset(seed=seed, options=options)
 
         self.player_position = np.argwhere(self.room_state == 5)[0]
         self.num_env_steps = 0
@@ -383,7 +383,7 @@ class SokobanEnv(LLMAgentEnv):
 
         return img
 
-    def close(self):
+    async def close(self):
         if self.viewer is not None:
             self.viewer.close()
 
@@ -524,55 +524,60 @@ Enjoy the challenge!
 """
 
 if __name__ == "__main__":
-    env = SokobanEnv()
-    obs, info = env.reset()
-    print(obs[0]["content"])
-    print(info)
+    async def main():
+        env = SokobanEnv()
+        obs, info = await env.reset()
+        print(obs[0]["content"])
+        print(info)
 
-    action = {
-        "role": "assistant",
-        "content": "",
-        "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_down"}}]
-    }
-    obs, reward, done, truncated, info = env.step(action)
-    print(obs[0]["content"])
-    print(f"{reward=}")
-    print(f"{done=}")
-    print(f"{truncated=}")
-    print(f"{info=}")
-    
-    action = {
-        "role": "assistant",
-        "content": "",
-        "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_right"}}]
-    }
-    obs, reward, done, truncated, info = env.step(action)
-    print(obs[0]["content"])
-    print(f"{reward=}")
-    print(f"{done=}")
-    print(f"{truncated=}")
-    print(f"{info=}")
-    
-    action = {
-        "role": "assistant",
-        "content": "",
-        "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_up"}}]
-    }
-    obs, reward, done, truncated, info = env.step(action)
-    print(obs[0]["content"])
-    print(f"{reward=}")
-    print(f"{done=}")
-    print(f"{truncated=}")
-    print(f"{info=}")
-    
-    action = {
-        "role": "assistant",
-        "content": "",
-        "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_left"}}]
-    }
-    obs, reward, done, truncated, info = env.step(action)
-    print(obs[0]["content"])
-    print(f"{reward=}")
-    print(f"{done=}")
-    print(f"{truncated=}")
-    print(f"{info=}")
+        action = {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_down"}}]
+        }
+        obs, reward, done, truncated, info = await env.step(action)
+        print(obs[0]["content"])
+        print(f"{reward=}")
+        print(f"{done=}")
+        print(f"{truncated=}")
+        print(f"{info=}")
+        
+        action = {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_right"}}]
+        }
+        obs, reward, done, truncated, info = await env.step(action)
+        print(obs[0]["content"])
+        print(f"{reward=}")
+        print(f"{done=}")
+        print(f"{truncated=}")
+        print(f"{info=}")
+        
+        action = {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_up"}}]
+        }
+        obs, reward, done, truncated, info = await env.step(action)
+        print(obs[0]["content"])
+        print(f"{reward=}")
+        print(f"{done=}")
+        print(f"{truncated=}")
+        print(f"{info=}")
+        
+        action = {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [{"id": "call_123", "type": "function", "function": {"name": "move_left"}}]
+        }
+        obs, reward, done, truncated, info = await env.step(action)
+        print(obs[0]["content"])
+        print(f"{reward=}")
+        print(f"{done=}")
+        print(f"{truncated=}")
+        print(f"{info=}")
+
+        await env.close()
+
+    asyncio.run(main())
