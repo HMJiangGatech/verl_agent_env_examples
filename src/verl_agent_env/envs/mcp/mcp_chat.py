@@ -31,6 +31,7 @@ class MCPChatEnv(LLMAgentEnv):
         self.mcp_client_dict = None
         self._action_space_json_schema = None
         self._tool_mcp_client_map = None
+        self._tool_name_map = None
 
     async def _cleanup_mcp_servers(self):
         if self.mcp_client_dict is not None:
@@ -38,7 +39,7 @@ class MCPChatEnv(LLMAgentEnv):
         self.mcp_client_dict = None
         self._action_space_json_schema = None
         self._tool_mcp_client_map = None
-    
+        self._tool_name_map = None
     def _get_info(self) -> dict:
         return {}
     
@@ -51,13 +52,21 @@ class MCPChatEnv(LLMAgentEnv):
             self.mcp_client_dict = {}
             self._action_space_json_schema = []
             self._tool_mcp_client_map = {}
+            self._tool_name_map = {}
             for server_name, server_config in self.mcp_config.items():
                 self.mcp_client_dict[server_name] = MCPClient(**server_config)
                 await self.mcp_client_dict[server_name].initialize()
                 tool_schema = self.mcp_client_dict[server_name].get_tool_json_schema()
-                self._action_space_json_schema.extend(tool_schema)
                 for tool in tool_schema:
-                    self._tool_mcp_client_map[tool["name"]] = server_name
+                    if tool["name"] not in self._tool_mcp_client_map:
+                        self._tool_mcp_client_map[tool["name"]] = server_name
+                    else:
+                        new_tool_name = f"{server_name}_{tool['name']}"
+                        self._tool_name_map[new_tool_name] = tool["name"]
+                        tool["name"] = new_tool_name
+                        self._tool_mcp_client_map[new_tool_name] = server_name
+                        print(f"Tool {tool['name']} is already registered to {self._tool_mcp_client_map[tool['name']]}, renamed to {new_tool_name}")
+                self._action_space_json_schema.extend(tool_schema)
                     
         return self.chat_history, self._get_info()
     
@@ -74,6 +83,8 @@ class MCPChatEnv(LLMAgentEnv):
             tool_id = tool_call["id"]
             tool_args = json.loads(tool_call["function"]["arguments"])
             mcp_client = self.mcp_client_dict[self._tool_mcp_client_map[tool_name]]
+            if tool_name in self._tool_name_map:
+                tool_name = self._tool_name_map[tool_name]
             tool_result = await mcp_client.execute_tool(tool_name, tool_args)
             obs.append({
                 "role": "tool",

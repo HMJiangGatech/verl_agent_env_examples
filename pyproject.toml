@@ -38,6 +38,7 @@ dev = [
     "mypy>=1.0",
     "fastapi>=0.95.0",
     "uvicorn>=0.22.0",
+    "mcp-server-fetch",
 ]
 
 [tool.pytest.ini_options]
