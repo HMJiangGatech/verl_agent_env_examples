@@ -50,4 +50,7 @@ target-version = ["py38"]
 
 [tool.isort]
 profile = "black"
-line_length = 88 
+line_length = 88
+
+[tool.hatch.metadata]
+allow-direct-references = true 
