@@ -17,10 +17,10 @@ async def main():
     # Initialize the environment
     print("\n\n###### Initialize Environment ######\n\n")
     mcp_config = {
-        # "filesystem": {
-        #     "command": "npx",
-        #     "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/jhaoming/Desktop"]
-        # },
+        "filesystem": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-filesystem", os.path.expanduser("~/")]
+        },
         "google-search": {
             "command": "npx",
             "args": [
@@ -31,6 +31,10 @@ async def main():
                 "GOOGLE_API_KEY": os.environ["GOOGLE_API_KEY"],
                 "GOOGLE_SEARCH_ENGINE_ID": os.environ["GOOGLE_SEARCH_ENGINE_ID"]
             }
+        },
+        "fetch": {
+            "command": "python",
+            "args": ["-m", "mcp_server_fetch"]
         }
     }
     init_obj = await interface.initialize_environment("verl_env/mcp_chat-v0",
@@ -39,7 +43,7 @@ async def main():
                                                     "chat_history": [
                                                         {
                                                             "role": "user",
-                                                            "content": "What is the weather in Tokyo?"
+                                                            "content": "Find the weather in top-5 cities in the US, and write your response in markdown format. Save them in a file called weather.md in the home directory:" + os.path.expanduser("~/")
                                                         }
                                                     ],
                                                     "mcp_config": mcp_config
@@ -59,7 +63,7 @@ async def main():
 
     # Agent Loop
     print("\n\n###### Agent Loop ######\n\n")
-    max_turns = 4
+    max_turns = 15
 
     messages = [
         {"role": "system", "content": task_prompt},
